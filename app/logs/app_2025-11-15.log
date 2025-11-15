@@ -1,0 +1,25 @@
+2025-11-15 14:04:10,765 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:08:23,726 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:12:05,977 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:12:06,713 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 14:18:11,759 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:18:13,117 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 14:26:14,892 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:26:15,773 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 14:26:19,204 [INFO] app: User qwerty@gmail.com is starting chat session
+2025-11-15 14:27:14,603 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:27:15,832 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 14:27:19,821 [INFO] app: User qwerty@gmail.com is starting chat session
+2025-11-15 14:54:39,535 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 14:54:40,197 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 15:15:16,145 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 15:15:16,776 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 15:15:24,461 [INFO] app: User qwerty@gmail.com is starting chat session
+2025-11-15 15:18:40,201 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 15:18:40,840 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 15:18:55,349 [INFO] app: User qwerty@gmail.com is starting chat session
+2025-11-15 15:20:49,403 [INFO] app: Authentication attempt for email: qwerty@gmail.com
+2025-11-15 15:20:50,099 [INFO] app: User qwerty@gmail.com authenticated successfully
+2025-11-15 15:20:57,302 [INFO] app: User qwerty@gmail.com is starting chat session
+2025-11-15 15:20:58,090 [INFO] app: Created new session 4 for user 52
+2025-11-15 15:20:59,018 [INFO] app: Sending request to Ollama model 'gemma3:4b' with 2 messages
