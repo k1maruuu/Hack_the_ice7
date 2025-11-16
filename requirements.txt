@@ -1,100 +1,41 @@
-# Основные зависимости
-psycopg2-binary==2.9.11
+fastapi==0.121.2
+uvicorn==0.21.1
+sqlalchemy==2.0.15
+psycopg2-binary==2.9.6
 pydantic[email]==2.12.4
+bcrypt==4.0.1
 passlib[bcrypt]==1.7.4
-python-jose[cryptography]==3.5.0
+python-jose[cryptography]==3.3.0
 celery==5.2.7
 redis==4.5.4
-python-dotenv==1.2.1
+python-dotenv==1.0.0
 python-multipart==0.0.9
 
-# Дополнительные функциональные зависимости
+#Potom
 transliterate==1.10.2
 alembic==1.14.1
-MarkupSafe==3.0.3
+MarkupSafe==3.0.2
 Mako==1.3.9
 httptools==0.6.4
 pyOpenSSL==25.0.0
-pyyaml==6.0.2
-watchfiles==1.0.4
+pyyaml==6.0.2 
+watchfiles==1.0.4 
 websockets==15.0
-deprecated==1.2.18
-limits==4.0.1
-packaging==24.0
-slowapi==0.1.9
+deprecated==1.2.18 
+limits==4.0.1 
+packaging==24.2 
+slowapi==0.1.9 
 wrapt==1.17.2
+#eshyo
+# Jinja2==3.1.5 
+# aiosmtplib==3.0.2 
+# blinker==1.9.0 
+# fastapi-mail==1.4.2 
+# pydantic==2.10.6 
+# pydantic-core==2.27.2 
+# pydantic-settings==2.8.1
+# === AI Integration ===
+ollama==0.6.1                    # Клиент для Ollama (чат-бот)
 
-# Data science и AI
-altair==5.5.0
-numpy==2.3.4
-pandas==2.3.3
-ollama==0.6.1
-
-# Веб-фреймворк и HTTP
-fastapi==0.121.2
-starlette==0.49.3
-uvicorn==0.38.0
-h11==0.16.0
-httpx==0.28.1
-httpcore==1.0.9
-email-validator==2.3.0
-
-# Работа с датами
-python-dateutil==2.9.0.post0
-pytz==2025.2
-tzdata==2025.2
-
-# Криптография
-cryptography<45, >=41.0.5
-bcrypt==5.0.0
-pyasn1==0.6.1
-rsa==4.9.1
-ecdsa==0.19.1
-cffi==2.0.0
-pycparser==2.23
-
-# Данные и сериализация
-pydeck==0.9.1
-pyarrow==21.0.0
-protobuf==6.33.1
-pillow==12.0.0
-
-# JSON валидация
-jsonschema==4.25.1
-jsonschema-specifications==2025.9.1
-referencing==0.37.0
-rpds-py==0.28.0
-
-# Вспомогательные библиотеки
-anyio==4.11.0
-asyncio==4.0.0
-attrs==25.4.0
-blinker==1.9.0
-certifi==2025.11.12
-charset-normalizer==3.4.4
-click==8.3.0
-colorama==0.4.6
-dnspython==2.8.0
-gitdb==4.0.12
-GitPython==3.1.45
-greenlet==3.2.4
-idna==3.11
-Jinja2==3.1.6
-narwhals==2.11.0
-pydantic_core==2.41.5
-requests==2.32.5
-six==1.17.0
-smmap==5.0.2
-sniffio==1.3.1
-SQLAlchemy==2.0.44
-streamlit==1.51.0
-tenacity==9.1.2
-toml==0.10.2
-tornado==6.5.2
-typing==3.7.4.3
-typing-extensions==4.15.0
-typing-inspection==0.4.2
-urllib3==2.5.0
-watchdog==6.0.0
-annotated-doc==0.0.4
-annotated-types==0.7.0
+httpx==0.28.1                    # HTTP-клиент (ollama использует его внутри)
+email-validator==2.3.0           # Валидация email в Pydantic
