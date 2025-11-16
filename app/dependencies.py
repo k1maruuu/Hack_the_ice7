@@ -1,11 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.schemas import UserInDB
+from app.schemas.schemas import UserInDB
 from app.database import get_db
 from app.auth import verify_token
 from app.crud import get_user_by_email
-from app.models import UserRole
+from app.models.models import UserRole
 from app.logging_config import logger
 """ЗАВИСИМОСТИ"""
 

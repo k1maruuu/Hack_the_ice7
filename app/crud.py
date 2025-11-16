@@ -3,8 +3,8 @@ from passlib.context import CryptContext
 from fastapi import HTTPException
 from dotenv import load_dotenv
 from app.logging_config import logger
-from app.schemas import UserCreate, UserUpdate, NewsCreate, NewsUpdate
-from app.models import User, Notification, News, UserRole
+from app.schemas.schemas import UserCreate, UserUpdate
+from app.models.models import User, Notification, UserRole
 from . import models, schemas
 from typing import Optional
 """ФУНКЦИИ"""
@@ -206,32 +206,3 @@ def has_block_notification(db: Session, user_id: int):
 
 def get_user_notifications(db: Session, user_id: int):
     return db.query(Notification).filter(Notification.user_id == user_id).order_by(Notification.created_at.desc()).all()
-
-
-"""CHAT"""
-def create_chat_message(db: Session, user_id: int, content: str) -> models.ChatMessage:
-    msg = models.ChatMessage(user_id=user_id, content=content)
-    db.add(msg)
-    db.commit()
-    db.refresh(msg)
-    return msg
-
-
-def get_chat_messages(db: Session, limit: int = 50) -> list[models.ChatMessage]:
-    # новые снизу, старые сверху
-    msgs = (
-        db.query(models.ChatMessage)
-        .order_by(models.ChatMessage.created_at.desc())
-        .limit(limit)
-        .all()
-    )
-    return list(reversed(msgs))
-
-
-def get_chat_message_by_id(db: Session, message_id: int) -> Optional[models.ChatMessage]:
-    return db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
-
-
-def delete_chat_message(db: Session, message: models.ChatMessage) -> None:
-    db.delete(message)
-    db.commit()

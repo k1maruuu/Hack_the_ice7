@@ -1,7 +1,7 @@
 from celery import Celery
 from dotenv import load_dotenv
 from transliterate import translit
-from app.schemas import UserCreate
+from app.schemas.schemas import UserCreate
 from app.logging_config import logger
 import os
 

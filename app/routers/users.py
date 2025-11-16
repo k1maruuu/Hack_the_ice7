@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from app.schemas import UserCreate, UserInDB, UserUpdate
+from app.schemas.schemas import UserCreate, UserInDB, UserUpdate
 from app.crud import get_user_by_email, create_user, update_user, search_users as search_users_crud, get_user_notifications, password_check
 from app.database import get_db
 from app.dependencies import get_current_user, get_admin_user
-from app.models import User, UserRole
+from app.models.models import User, UserRole
 from app.tasks import generate_email_for_employee
 from app.logging_config import logger
 
