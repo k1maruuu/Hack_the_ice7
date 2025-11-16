@@ -59,23 +59,8 @@ class User(Base):
 
     burn_out_score = Column(Integer, nullable=True)
 
-    chat_messages = relationship(
-        "ChatMessage",
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
-
     chat_sessions_bot = relationship("ChatBotSession", back_populates="user")
 
-class News(Base):
-    __tablename__ = "news"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False) 
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class ChatBotSession(Base):
     __tablename__ = "chat_sessions_bot"
@@ -98,14 +83,3 @@ class ChatBotMessage(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     session = relationship("ChatBotSession", back_populates="messages")
-
-
-class ChatMessage(Base):
-    __tablename__ = "chat_messages"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    content = Column(String(500), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
-    user = relationship("User", back_populates="chat_messages")

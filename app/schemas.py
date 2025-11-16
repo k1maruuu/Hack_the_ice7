@@ -88,31 +88,6 @@ class UserInDB(UserBase):
         from_attributes  = True  
 
 
-"""NEWS"""
-
-class NewsBase(BaseModel):
-    title: str
-    content: str
-
-
-class NewsCreate(NewsBase):
-    pass
-
-
-class NewsUpdate(NewsBase):
-    is_active: Optional[bool] = None
-
-
-class NewsInDB(NewsBase):
-    id: int
-    created_by: int
-    is_active: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes  = True
-
-
 """КЛАССЫ TOKENA"""
 
 class Token(BaseModel):
@@ -122,38 +97,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
-
-
-"""CHAT"""
-
-class UserShort(BaseModel):
-    id: int
-    full_name: str
-
-    class Config:
-        from_attributes  = True
-
-
-class ChatMessageBase(BaseModel):
-    content: constr(min_length=1, max_length=500)
-
-
-class ChatMessageCreate(ChatMessageBase):
-    pass
-
-
-class ChatMessageRead(ChatMessageBase):
-    id: int
-    created_at: datetime
-    user: UserShort
-
-    class Config:
-        from_attributes  = True
-
-
-
-        
-###############################
 
 
 class ChatMessageBotBase(BaseModel):

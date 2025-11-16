@@ -208,49 +208,7 @@ def get_user_notifications(db: Session, user_id: int):
     return db.query(Notification).filter(Notification.user_id == user_id).order_by(Notification.created_at.desc()).all()
 
 
-"""NEWS"""
-def create_news(db: Session, news: NewsCreate, user_id: int):
-    db_news = News(
-        title=news.title,
-        content=news.content,
-        created_by=user_id,
-        is_active=True
-    )
-    db.add(db_news)
-    db.commit()
-    db.refresh(db_news)
-    return db_news
-
-def get_news(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(News).filter(News.is_active == True).order_by(News.created_at.desc()).offset(skip).limit(limit).all()
-
-def get_news_by_id(db: Session, news_id: int):
-    return db.query(News).filter(News.id == news_id, News.is_active == True).first()
-
-def update_news(db: Session, news_id: int, news_update: NewsUpdate):
-    db_news = db.query(News).filter(News.id == news_id).first()
-    if not db_news:
-        return None
-    if news_update.title is not None:
-        db_news.title = news_update.title
-    if news_update.content is not None:
-        db_news.content = news_update.content
-    if news_update.is_active is not None:
-        db_news.is_active = news_update.is_active
-    db.commit()
-    db.refresh(db_news)
-    return db_news
-
-def delete_news(db: Session, news_id: int):
-    db_news = db.query(News).filter(News.id == news_id).first()
-    if not db_news:
-        return None
-    db_news.is_active = False
-    db.commit()
-    return db_news
-
-"""CAHT"""
-#CHAT
+"""CHAT"""
 def create_chat_message(db: Session, user_id: int, content: str) -> models.ChatMessage:
     msg = models.ChatMessage(user_id=user_id, content=content)
     db.add(msg)

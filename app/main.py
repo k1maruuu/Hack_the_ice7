@@ -32,6 +32,4 @@ app.add_middleware(
 
 app.include_router(auth_main.router)
 app.include_router(users.router)
-# app.include_router(news.router)
-# app.include_router(chat.router)
 app.include_router(ai.router)
