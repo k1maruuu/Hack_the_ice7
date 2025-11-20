@@ -27,6 +27,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 def get_admin_user(current_user: UserInDB = Depends(get_current_user)):
     if current_user.role != UserRole.ADMIN:
-        logger.warning(f"У пользователя {current_user.email_corporate} нет доступа")
+        logger.warning(f"У пользователя {current_user.email_user} нет доступа")
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user

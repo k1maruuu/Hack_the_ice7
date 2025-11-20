@@ -16,7 +16,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 """USER"""
 def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email_corporate == email).first()
+    return db.query(User).filter(User.email_user == email).first()
 
 def get_user(db: Session, user_id: int):
     db_user = db.query(User).filter(User.id == user_id).first()
@@ -61,59 +61,30 @@ def create_user(db: Session, user: UserCreate) -> User:
     hashed_password = pwd_context.hash(user.password)
 
     db_user = User(
-        birthday=user.birthday,
-        sex=user.sex,
-        tg_name=user.tg_name,
-        position_employee=user.position_employee,
-        email_user=user.email_user,
-        email_corporate=user.email_corporate,
-        hashed_password=hashed_password,
         full_name=user.full_name,
+        sex=user.sex,
+        email_user=user.email_user,
+        hashed_password=hashed_password,
         phone_number=user.phone_number,
         role=user.role,
         is_active=True,
         login_attempts=0,
-
-        city=user.city,
-        work_experience=user.work_experience,
-        hierarchy_status=user.hierarchy_status,
-        june=user.june,
-        july=user.july,
-        august=user.august,
-        september=user.september,
-        october=user.october,
-        accreditation=user.accreditation,
-        training=user.training,
-        vacation=user.vacation,
-        sick_leave=user.sick_leave,
-        rebuke=user.rebuke,
-        activity=user.activity,
     )
 
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    logger.info(f"Создан новый пользователь: {db_user.email_corporate}, ID: {db_user.id}")
+    logger.info(f"Создан новый пользователь: {db_user.email_user}, ID: {db_user.id}")
     return db_user
 
 
 def update_user(db: Session, user_id: int, user_update: UserUpdate):
     NOTIFY_FIELDS = {
-    "full_name": "Ваше имя обновлено",
-    "phone_number": "Ваш номер телефона обновлён",
-    "position_employee": "Ваша должность обновлена",
-    "email_user": "Ваш личный email обновлён",
-    "tg_name": "Ваш Telegram обновлён",
-    "sex": "Ваш пол обновлён",
-    "birthday": "Ваша дата рождения обновлена",
-
-    "city": "Ваш город обновлён",
-    "hierarchy_status": "Ваш статус в иерархии обновлён",
-    "vacation": "Информация об отпуске обновлена",
-    "training": "Данные о вашем обучении обновлены",
-    "accreditation": "Данные об аттестации обновлены"
-}
-
+        "full_name": "Ваше имя обновлено",
+        "phone_number": "Ваш номер телефона обновлён",
+        "email_user": "Ваш email обновлён",
+        "sex": "Ваш пол обновлён",
+    }
 
     db_user = db.query(User).filter(User.id == user_id).first()
     if not db_user:
@@ -131,7 +102,7 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate):
     return db_user
 
 
-def search_users(db: Session, full_name: str = None, role: UserRole = None, sex: str = None, position_employee: str = None):
+def search_users(db: Session, full_name: str = None, role: UserRole = None, sex: str = None):
     try:
         query = db.query(User)
 
@@ -148,10 +119,6 @@ def search_users(db: Session, full_name: str = None, role: UserRole = None, sex:
             if sex not in ["М", "Ж"]:
                 raise HTTPException(status_code=422, detail="Invalid sex value. Must be 'М' or 'Ж'")
             query = query.filter(User.sex == sex)
-
-        # Фильтрация по должности
-        if position_employee:
-            query = query.filter(User.position_employee.ilike(f"%{position_employee}%"))
 
         result = query.all()
         print(f"Search results for filters {locals()}: {[u.full_name for u in result]}")  # Отладка
@@ -178,7 +145,7 @@ def authenticate_user(db: Session, email: str, password: str):
                     admins = db.query(User).filter(User.role == "admin").all()
                     for admin in admins:
                         if not has_block_notification(db, admin.id):
-                            create_notification(db, admin.id, f"Пользователь {user.email_corporate} заблокирован из-за неудачных попыток входа.")
+                            create_notification(db, admin.id, f"Пользователь {user.email_user} заблокирован из-за неудачных попыток входа.")
         db.commit()
         return False
     user.login_attempts = 0 
@@ -197,12 +164,22 @@ def create_notification(db: Session, user_id: int, message: str):
     db.refresh(db_notification)
     return db_notification
 
-def has_block_notification(db: Session, user_id: int):
-    """Проверяет, есть ли уже уведомление о блокировке для пользователя."""
+
+def has_block_notification(db: Session, user_id: int) -> bool:
     return db.query(Notification).filter(
         Notification.user_id == user_id,
-        Notification.message.like("%заблокирован из-за неудачных попыток входа%")
+        Notification.message.like("%заблокирован%")
     ).first() is not None
 
-def get_user_notifications(db: Session, user_id: int):
-    return db.query(Notification).filter(Notification.user_id == user_id).order_by(Notification.created_at.desc()).all()
+
+def get_notifications(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(Notification).filter(Notification.user_id == user_id).order_by(Notification.created_at.desc()).offset(skip).limit(limit).all()
+
+
+def mark_notification_as_read(db: Session, notification_id: int, user_id: int):
+    notification = db.query(Notification).filter(Notification.id == notification_id, Notification.user_id == user_id).first()
+    if notification:
+        notification.is_read = True
+        db.commit()
+        return notification
+    return None
