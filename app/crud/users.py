@@ -6,6 +6,8 @@ from app.logging_config import logger
 from app.schemas.schemas import UserCreate, UserUpdate
 from app.models.models import User, Notification, UserRole
 from typing import Optional
+
+from app.crud.notifications import has_block_notification, create_notification
 """ФУНКЦИИ"""
 
 load_dotenv()
