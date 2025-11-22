@@ -27,37 +27,14 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, nullable=False)
-    birthday = Column(Date, nullable=False)
     sex = Column(String, nullable=True)
     email_user = Column(String, unique=True, index=True, nullable=False)
-    email_corporate = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
-    tg_name = Column(String, nullable=True)
-    position_employee = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active = Column(Boolean, default=True)
     login_attempts = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    city = Column(String, nullable=True)
-    work_experience = Column(Integer, nullable=True)
-    hierarchy_status = Column(String, nullable=True)
-
-    june = Column(Integer, nullable=True)
-    july = Column(Integer, nullable=True)
-    august = Column(Integer, nullable=True)
-    september = Column(Integer, nullable=True)
-    october = Column(Integer, nullable=True)
-
-    accreditation = Column(String, nullable=True)
-    training = Column(String, nullable=True)
-    vacation = Column(String, nullable=True)
-    sick_leave = Column(Boolean, nullable=True)
-    rebuke = Column(Boolean, nullable=True)
-    activity = Column(Boolean, nullable=True)
-
-    burn_out_score = Column(Integer, nullable=True)
 
     chat_sessions_bot = relationship("ChatBotSession", back_populates="user")
 

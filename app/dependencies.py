@@ -1,11 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.schemas import UserInDB
+from app.schemas.schemas import UserInDB
 from app.database import get_db
 from app.auth import verify_token
 from app.crud import get_user_by_email
-from app.models import UserRole
+from app.models.models import UserRole
 from app.logging_config import logger
 """ЗАВИСИМОСТИ"""
 
@@ -27,6 +27,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 def get_admin_user(current_user: UserInDB = Depends(get_current_user)):
     if current_user.role != UserRole.ADMIN:
-        logger.warning(f"У пользователя {current_user.email_corporate} нет доступа")
+        logger.warning(f"У пользователя {current_user.email_user} нет доступа")
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
