@@ -107,6 +107,42 @@ def _find_bus_route(routes: List[Dict[str, Any]], point_a: str, point_b: str) ->
             return r
     return None
 
+def _pick_nearest_bus_timetable(
+    timetables_for_date: List[Dict[str, Any]],
+    target_date: date,
+) -> Optional[Dict[str, Any]]:
+    """
+    Из списка рейсов автобуса на этот маршрут и дату выбираем один "ближайший".
+    Сейчас логика простая: просто самый ранний по времени отправления в этот день.
+
+    timetables_for_date — элементы Catalog_РейсыРасписания для маршрута,
+    уже отфильтрованные по регулярности на конкретную дату.
+    """
+    if not timetables_for_date:
+        return None
+
+    def _get_dep_time(t: Dict[str, Any]) -> time:
+        ts = t.get("ВремяОтправления")
+        if not ts:
+            return time(0, 0)
+        try:
+            # ts вида '0001-01-01T14:00:00'
+            return datetime.fromisoformat(ts).time()
+        except Exception:
+            return time(0, 0)
+
+    # берём рейс с минимальным временем отправления
+    best = min(timetables_for_date, key=_get_dep_time)
+
+    dep_iso = _combine_date_and_time(target_date, best.get("ВремяОтправления"))
+    arr_iso = _combine_date_and_time(target_date, best.get("ВремяПрибытия"))
+
+    return {
+        "timetable": best,            # весь блок из Catalog_РейсыРасписания (с Автобус_Key и прочим)
+        "departure_at": dep_iso,      # уже "склеенная" дата+время
+        "arrival_at": arr_iso,
+    }
+
 
 @router.get("/search")
 async def search_routes(
@@ -171,17 +207,7 @@ async def search_routes(
         timetables_out = await gars_service.get_route_timetables_with_cache(out_route_id)
         bus_out_for_date = [t for t in timetables_out if _runs_on_date(t, dep_date)]
 
-        bus_out_options: List[Dict[str, Any]] = []
-        for t in bus_out_for_date:
-            dep_iso = _combine_date_and_time(dep_date, t.get("ВремяОтправления"))
-            arr_iso = _combine_date_and_time(dep_date, t.get("ВремяПрибытия"))
-            bus_out_options.append(
-                {
-                    "timetable": t,
-                    "departure_at": dep_iso,
-                    "arrival_at": arr_iso,
-                }
-            )
+        nearest_bus_out = _pick_nearest_bus_timetable(bus_out_for_date, dep_date)
 
         outbound = {
             "date": dep_date.isoformat(),
@@ -192,16 +218,14 @@ async def search_routes(
                     "origin": origin,
                     "destination": "Якутск",
                     "options": flights_out,
-                }
-                # если origin = Якутск, просто будет пустой список рейсов
-                ,
+                },
                 {
                     "segment_type": "bus",
                     "provider": "GARS_1C",
                     "origin": "Якутск",
                     "destination": destination,
-                    "route": bus_route_out,
-                    "options": bus_out_options,
+                    "route": bus_route_out,        # <- это твой пример из Catalog_Маршруты
+                    "schedule": nearest_bus_out,   # <- это один блок из Catalog_РейсыРасписания + склеенные время/дата
                 },
             ],
         }
@@ -285,17 +309,43 @@ async def search_routes(
 
     ret_part_flight_only: Optional[Dict[str, Any]] = None
     if ret_date is not None:
-        flights_back = await _get_s7_flights(origin_city=destination, dest_city=origin, departure_date=ret_date)
-        ret_part_flight_only = {
+        flights_back: List[Dict[str, Any]] = []
+        if not is_yakutsk_origin:
+            flights_back = await _get_s7_flights(
+                origin_city="Якутск",
+                dest_city=origin,
+                departure_date=ret_date,
+            )
+
+        nearest_bus_back = None
+        if bus_route_back is not None:
+            back_route_id = bus_route_back.get("Ref_Key")
+            if not back_route_id:
+                raise HTTPException(status_code=500, detail="У автобусного маршрута (обратно) нет Ref_Key в 1С")
+
+            timetables_back = await gars_service.get_route_timetables_with_cache(back_route_id)
+            bus_back_for_date = [t for t in timetables_back if _runs_on_date(t, ret_date)]
+
+            nearest_bus_back = _pick_nearest_bus_timetable(bus_back_for_date, ret_date)
+
+        ret_part = {
             "date": ret_date.isoformat(),
             "segments": [
                 {
+                    "segment_type": "bus",
+                    "provider": "GARS_1C",
+                    "origin": destination,
+                    "destination": "Якутск",
+                    "route": bus_route_back,       # объект из Catalog_Маршруты (как в примере)
+                    "schedule": nearest_bus_back,  # один рейс из Catalog_РейсыРасписания
+                },
+                {
                     "segment_type": "flight",
                     "provider": "S7",
-                    "origin": destination,
+                    "origin": "Якутск",
                     "destination": origin,
                     "options": flights_back,
-                }
+                },
             ],
         }
 
@@ -308,6 +358,7 @@ async def search_routes(
         "outbound": outbound,
         "return": ret_part_flight_only,
     }
+
 
 @router.get("/{route_id}", response_model=RouteResponse)
 async def get_route(

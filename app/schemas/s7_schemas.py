@@ -16,3 +16,4 @@ class S7Flight(BaseModel):
     dep_time: str
     arr_time: str
     price_rub: int
+    booking_url: str

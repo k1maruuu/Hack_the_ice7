@@ -10,10 +10,15 @@ from app.database import get_db
 from app.dependencies import get_current_user, get_admin_user
 from app.models.models import User, UserRole
 from app.logging_config import logger
-
+from pydantic import BaseModel, EmailStr
 router = APIRouter(prefix="/users", tags=["users"])
 limiter = Limiter(key_func=get_remote_address)
-
+class UserRegister(BaseModel):
+    full_name: str
+    sex: Optional[str] = None
+    email_user: EmailStr
+    phone_number: str
+    password: str
 """POST"""
 """СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ"""
 @router.post("/", response_model=UserInDB)
@@ -135,3 +140,40 @@ def get_my_notifications(
 ):
     notifications = get_user_notifications(db, user_id=current_user.id)
     return [{"id": n.id, "message": n.message, "is_read": n.is_read, "created_at": n.created_at} for n in notifications]
+
+
+
+
+"""Register"""
+@router.post("/register", response_model=UserInDB, include_in_schema=False)
+@limiter.limit("20/hour")
+async def public_register_user(
+    request: Request,
+    payload: UserRegister,
+    db: Session = Depends(get_db),
+):
+    existing = get_user_by_email(db, email=payload.email_user)
+    if existing:
+        logger.warning(
+            f"Ошибка регистрации: Email {payload.email_user} уже зарегистрирован"
+        )
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    user_create = UserCreate(
+        full_name=payload.full_name,
+        sex=payload.sex,
+        email_user=payload.email_user,
+        phone_number=payload.phone_number,
+        role=UserRole.USER, 
+        password=payload.password,
+    )
+
+    if not password_check(user_create):
+        logger.warning(
+            f"Ошибка регистрации {payload.email_user}: слабый пароль"
+        )   
+        raise HTTPException(status_code=403, detail="Weak password")
+
+    new_user = create_user(db=db, user=user_create)
+    logger.info(f"Новый пользователь {new_user.email_user} успешно зарегистрирован")
+    return new_user
