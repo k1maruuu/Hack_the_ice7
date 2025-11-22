@@ -109,3 +109,21 @@ class GARSClient:
             params={"$format": "json"}
         )
         return response
+
+    async def get_route_timetables(self, route_id: str) -> Optional[List[Dict]]:
+        """
+        Расписания рейсов из Catalog_РейсыРасписания по конкретному маршруту.
+
+        route_id = Ref_Key из Catalog_Маршруты
+        """
+        params = {
+            "$filter": f"Маршрут_Key eq guid'{route_id}'",
+            "$format": "json",
+            "$expand": "Остановки"
+        }
+
+        response = await self._make_request("GET", "Catalog_РейсыРасписания", params)
+
+        if response and "value" in response:
+            return response["value"]
+        return None

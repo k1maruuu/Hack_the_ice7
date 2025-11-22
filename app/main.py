@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from app.routers import auth_main, users, routes, s7 #, bookings, payments
+from app.routers import auth_main, users, routes, s7, gars_routes, multimodal  # , bookings, payments
 from app.database import engine
 from app.models import models
 from dotenv import load_dotenv
@@ -40,6 +40,8 @@ app.include_router(auth_main.router)
 app.include_router(users.router)
 app.include_router(routes.router)
 app.include_router(s7.router)
+app.include_router(gars_routes.router)
+app.include_router(multimodal.router)
 # app.include_router(bookings.router)  # Будет создано позже
 # app.include_router(payments.router)   # Будет создано позже
 

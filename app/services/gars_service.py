@@ -5,6 +5,7 @@ from app.utils.cache import cache_service
 from app.models.route_models import Route, RouteSegment, TransportType
 from app.schemas.route_schemas import RouteSearchRequest
 import json
+import os
 
 class GARSService:
     def __init__(self):
@@ -109,3 +110,56 @@ class GARSService:
             "availability": availability or {},
             "min_price": min([p.get("Price", 0) for p in prices]) if prices else 0
         }
+        
+    async def get_filtered_routes_cached(self) -> List[Dict[str, Any]]:
+        """
+        Маршруты из 1С с кэшированием.
+
+        Фильтр:
+        - выкидываем старые с суффиксом ' С' в описании (пример: 'Сангар - Якутск С')
+        - выкидываем те, где в Description есть '2024' или 'Тест'
+        """
+        cache_key = "gars:routes:filtered"
+        cached = await cache_service.get_json(cache_key)
+        if cached is not None:
+            return cached
+
+        routes_data = await self.client.get_routes()
+        if not routes_data:
+            return []
+
+        filtered: List[Dict[str, Any]] = []
+        for r in routes_data:
+            desc = (r.get("Description") or "")
+
+            # 1) убираем '2024' и 'Тест'
+            if "2024" in desc or "Тест" in desc:
+                continue
+
+            # 2) убираем старые маршруты с суффиксом ' С' в конце (большая русская "С")
+            if desc.strip().endswith("С"):
+                continue
+
+            filtered.append(r)
+
+        ttl = int(os.getenv("CACHE_TTL_ROUTES", "3600"))
+        await cache_service.set_json(cache_key, filtered, expire=ttl)
+        return filtered
+
+    async def get_route_timetables_with_cache(self, route_id: str) -> List[Dict[str, Any]]:
+        """
+        Расписания рейсов из Catalog_РейсыРасписания по маршруту (с кэшем).
+        """
+        cache_key = f"gars:timetable:{route_id}"
+        cached = await cache_service.get_json(cache_key)
+        if cached is not None:
+            return cached
+
+        timetables = await self.client.get_route_timetables(route_id) or []
+
+        ttl = int(os.getenv("CACHE_TTL_SCHEDULE", "1800"))
+        if timetables:
+            await cache_service.set_json(cache_key, timetables, expire=ttl)
+
+        return timetables
+
