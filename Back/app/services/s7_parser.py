@@ -105,7 +105,6 @@ def parse_ibe_page(page) -> List[Dict]:
                     "dep_time": dep_time,
                     "arr_time": arr_time,
                     "price_rub": price_rub,
-                    "booking_url": page.url,
                 }
             )
         except Exception:

@@ -35,9 +35,20 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     login_attempts = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+    bookings = relationship(
+        "Booking",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    
     chat_sessions_bot = relationship("ChatBotSession", back_populates="user")
 
+    support_chat = relationship(
+        "SupportChat",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
 class ChatBotSession(Base):
     __tablename__ = "chat_sessions_bot"
@@ -60,3 +71,31 @@ class ChatBotMessage(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     session = relationship("ChatBotSession", back_populates="messages")
+    
+"""Support"""
+class SupportChat(Base):
+    __tablename__ = "support_chats"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="support_chat")
+    messages = relationship(
+        "SupportMessage",
+        back_populates="chat",
+        cascade="all, delete-orphan",
+    )
+
+class SupportMessage(Base):
+    __tablename__ = "support_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    chat_id = Column(Integer, ForeignKey("support_chats.id"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    chat = relationship("SupportChat", back_populates="messages")
+    sender = relationship("User")
+
